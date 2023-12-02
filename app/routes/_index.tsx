@@ -3,6 +3,8 @@ import { Form } from '@remix-run/react'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 
+import { useGlobalState } from '~/context/global-context'
+
 export const meta: MetaFunction = () => {
   return [
     { title: 'Hours automation app' },
@@ -11,12 +13,18 @@ export const meta: MetaFunction = () => {
 }
 
 export default function Index() {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [userToken, setUserToken] = useState('')
+  const {
+    dispatch,
+    state: { token },
+  } = useGlobalState()
+
   const titles = [
     'Hi there!',
     'You want to automate your hours in teamleader?',
     'We first need a token',
   ]
-  const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,6 +38,22 @@ export default function Index() {
 
     return () => clearInterval(interval)
   }, [activeIndex])
+
+  function dispatchToken() {
+    if (!userToken) return
+
+    dispatch({
+      type: 'add_token',
+      value: userToken,
+    })
+  }
+
+  function startOver(): void {
+    dispatch({
+      type: 'add_token',
+      value: '',
+    })
+  }
 
   return (
     <div className="h-screen w-screen dark:bg-slate-800 bg-slate-100 grid place-items-center">
@@ -48,19 +72,41 @@ export default function Index() {
           }}
           transition={{ ease: 'easeOut', duration: 0.5 }}
         >
-          <Form>
-            <fieldset className="flex flex-col w-1/2">
-              <label htmlFor="token" className="dark:text-white text-slate-900">
-                Token
-              </label>
-              <input
-                type="text"
-                name="token"
-                id="token"
-                className="p-2 rounded-lg border-slate-300 border"
-              />
-            </fieldset>
-          </Form>
+          {token ? (
+            <div>
+              <p>{token}</p>
+              <button
+                onClick={startOver}
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg mt-2"
+              >
+                Start over
+              </button>
+            </div>
+          ) : (
+            <Form>
+              <fieldset className="flex flex-col w-1/2">
+                <label
+                  htmlFor="token"
+                  className="dark:text-white text-slate-900"
+                >
+                  Token
+                </label>
+                <input
+                  onChange={(e) => setUserToken(e.target.value)}
+                  type="text"
+                  name="token"
+                  id="token"
+                  className="p-2 rounded-lg border-slate-300 border"
+                />
+              </fieldset>
+              <button
+                onClick={dispatchToken}
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg mt-2"
+              >
+                Set token
+              </button>
+            </Form>
+          )}
         </motion.div>
       </div>
     </div>

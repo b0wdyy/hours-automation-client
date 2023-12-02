@@ -10,7 +10,7 @@ import {
 
 import stylesheet from '~/tailwind.css'
 
-import { ColorSchemeToggle } from './components/ui/color-scheme-toggle'
+import { GlobalStateProvider } from './context/global-context'
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: stylesheet },
@@ -26,8 +26,9 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <ColorSchemeToggle />
-        <Outlet />
+        <GlobalStateProvider>
+          <Outlet />
+        </GlobalStateProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
