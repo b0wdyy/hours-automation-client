@@ -1,4 +1,4 @@
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction } from '@remix-run/node'
 import {
   Links,
   LiveReload,
@@ -6,12 +6,15 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "@remix-run/react";
-import stylesheet from "~/tailwind.css";
+} from '@remix-run/react'
+
+import stylesheet from '~/tailwind.css'
+
+import { ColorSchemeToggle } from './components/ui/color-scheme-toggle'
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
-];
+  { rel: 'stylesheet', href: stylesheet },
+]
 
 export default function App() {
   return (
@@ -23,11 +26,12 @@ export default function App() {
         <Links />
       </head>
       <body>
+        <ColorSchemeToggle />
         <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
       </body>
     </html>
-  );
+  )
 }
