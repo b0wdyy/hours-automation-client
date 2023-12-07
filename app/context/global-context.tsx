@@ -10,6 +10,7 @@ interface GlobalStateProviderProps {
 type Action =
   | { type: 'add_date'; value: Date }
   | { type: 'add_token'; value: string }
+  | { type: 'reset' }
 type Dispatch = (action: Action) => void
 interface State {
   token: string
@@ -38,6 +39,12 @@ function globalContextReducer(state: State, action: Action) {
       return {
         ...state,
         token: action.value,
+      }
+
+    case 'reset':
+      return {
+        token: '',
+        dates: [],
       }
   }
 }
