@@ -13,9 +13,8 @@ import {
 } from 'date-fns'
 import { useState } from 'react'
 
-interface DatePickerProps {
-  onDateClick: (date: string) => void
-}
+import { useGlobalState } from '~/context/global-context'
+import { isDateInArray } from '~/utils/date'
 
 function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(' ')
@@ -31,11 +30,15 @@ const colStartClasses = [
   'col-start-7',
 ]
 
-export function DatePicker({ onDateClick }: DatePickerProps) {
+export function DatePicker() {
   const today = startOfToday()
   const [selectedDay, setSelectedDay] = useState(today)
   const [currentMonth, setCurrentMonth] = useState(format(today, 'MMM-yyyy'))
   const firstDayCurrentMonth = parse(currentMonth, 'MMM-yyyy', new Date())
+  const {
+    dispatch,
+    state: { dates },
+  } = useGlobalState()
 
   const days = eachDayOfInterval({
     start: firstDayCurrentMonth,
@@ -50,6 +53,14 @@ export function DatePicker({ onDateClick }: DatePickerProps) {
   function nextMonth() {
     const firstDayNextMonth = add(firstDayCurrentMonth, { months: 1 })
     setCurrentMonth(format(firstDayNextMonth, 'MMM-yyyy'))
+  }
+
+  function onDayClick(day: Date) {
+    setSelectedDay(day)
+    dispatch({
+      type: 'add_date',
+      value: day,
+    })
   }
 
   return (
@@ -95,10 +106,12 @@ export function DatePicker({ onDateClick }: DatePickerProps) {
           >
             <button
               type="button"
-              onClick={() => setSelectedDay(day)}
+              onClick={() => onDayClick(day)}
               className={classNames(
                 isEqual(day, selectedDay) && 'text-white',
-                !isEqual(day, selectedDay) && isToday(day) && 'text-violet-500',
+                !isEqual(day, selectedDay) &&
+                  isToday(day) &&
+                  'text-white bg-slate-300',
                 !isEqual(day, selectedDay) &&
                   !isToday(day) &&
                   isSameMonth(day, firstDayCurrentMonth) &&
@@ -107,11 +120,12 @@ export function DatePicker({ onDateClick }: DatePickerProps) {
                   !isToday(day) &&
                   !isSameMonth(day, firstDayCurrentMonth) &&
                   'text-gray-400',
-                isEqual(day, selectedDay) && isToday(day) && 'bg-red-500',
+                isEqual(day, selectedDay) && isToday(day) && 'bg-slate-800',
                 isEqual(day, selectedDay) && !isToday(day) && 'bg-gray-900',
                 !isEqual(day, selectedDay) && 'hover:bg-gray-200',
                 (isEqual(day, selectedDay) || isToday(day)) && 'font-semibold',
-                'mx-auto flex h-8 w-8 items-center justify-center rounded-full',
+                isDateInArray(day, dates) && 'bg-slate-500 text-white',
+                'mx-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors',
               )}
             >
               <time dateTime={format(day, 'yyyy-MM-dd')}>

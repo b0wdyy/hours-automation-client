@@ -1,16 +1,19 @@
+import { isEqual } from 'date-fns'
 import { createContext, useContext, useMemo, useReducer } from 'react'
+
+import { isDateInArray } from '~/utils/date'
 
 interface GlobalStateProviderProps {
   children: React.ReactNode
 }
 
 type Action =
-  | { type: 'add_dates'; value: any[] }
+  | { type: 'add_date'; value: Date }
   | { type: 'add_token'; value: string }
 type Dispatch = (action: Action) => void
 interface State {
   token: string
-  dates: any[]
+  dates: Date[]
 }
 
 export const GlobalContext = createContext<
@@ -19,11 +22,18 @@ export const GlobalContext = createContext<
 
 function globalContextReducer(state: State, action: Action) {
   switch (action.type) {
-    case 'add_dates':
+    case 'add_date':
+      if (isDateInArray(action.value, state.dates)) {
+        return {
+          ...state,
+          dates: state.dates.filter((date) => !isEqual(date, action.value)),
+        }
+      }
       return {
         ...state,
-        dates: action.value,
+        dates: [...state.dates, action.value],
       }
+
     case 'add_token':
       return {
         ...state,

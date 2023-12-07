@@ -23,6 +23,17 @@ export const meta: MetaFunction = () => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const form = await request.formData()
   const token = form.get('token') || ''
+  const resetCookie = Boolean(form.get('resetCookie')) || false
+  console.log(resetCookie)
+
+  if (resetCookie) {
+    return redirect('/', {
+      headers: {
+        'Set-Cookie': await userToken.serialize(''),
+      },
+    })
+  }
+
   const cookieHeader = request.headers.get('Cookie')
   let cookie = (await userToken.parse(cookieHeader)) || ''
 
@@ -45,10 +56,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 }
 
 export default function Index() {
-  const {
-    dispatch,
-    state: { dates },
-  } = useGlobalState()
+  const { dispatch } = useGlobalState()
   const { cookieToken } = useLoaderData<typeof loader>()
 
   function dispatchToken() {
@@ -67,10 +75,17 @@ export default function Index() {
   return (
     <div className="h-screen w-screen dark:bg-slate-800 bg-slate-100 grid place-items-center">
       <div className="w-1/2 p-8 rounded-lg shadow-md dark:bg-slate-600 bg-slate-50">
+        <Form method="post">
+          <input type="hidden" name="resetCookie" value="true" />
+          <button
+            className="px-4 py-2 bg-slate-900 text-white rounded-lg mb-4 cursor-pointer disabled:bg-slate-300 disabled:cursor-not-allowed"
+            disabled={!cookieToken}
+          >
+            Reset
+          </button>
+        </Form>
         {!cookieToken ? <TokenForm token={cookieToken} /> : null}
-        {cookieToken && !dates.length ? (
-          <DatePicker onDateClick={console.log} />
-        ) : null}
+        {cookieToken ? <DatePicker /> : null}
       </div>
     </div>
   )
