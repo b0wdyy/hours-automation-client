@@ -6,6 +6,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from '@remix-run/react'
 
 import stylesheet from '~/tailwind.css'
@@ -16,7 +17,17 @@ export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: stylesheet },
 ]
 
+export const loader = async () => {
+  return {
+    ENV: {
+      API_URL: process.env.API_URL,
+    },
+  }
+}
+
 export default function App() {
+  const data = useLoaderData<typeof loader>()
+
   return (
     <html lang="en">
       <head>
@@ -30,6 +41,11 @@ export default function App() {
           <Outlet />
         </GlobalStateProvider>
         <ScrollRestoration />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
+          }}
+        />
         <Scripts />
         <LiveReload />
       </body>
